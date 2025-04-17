@@ -8,5 +8,4 @@ class AgroRequest(BaseModel):
 
 
 class AgroResponse(BaseModel):
-    id: str
-    result: Optional[dict] = None
+    status: str
