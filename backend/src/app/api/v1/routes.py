@@ -23,9 +23,11 @@ router = APIRouter(
 
 
 @router.post("/process", response_model=AgroResponse)
-def process_agro_message(request: AgroRequest,
-                         settings=Depends(get_settings),
-                         background_tasks: BackgroundTasks):
+def process_agro_message(
+                        request: AgroRequest,
+                        background_tasks: BackgroundTasks,
+                        settings=Depends(get_settings)
+                        ):
     def process_message():
         try:
             model = YandexGPT(settings=settings)
