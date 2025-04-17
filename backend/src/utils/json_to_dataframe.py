@@ -12,6 +12,7 @@ def json_to_dataframe(data: json) -> pd.DataFrame:
 
         if not is_multi:
             record = {
+                'дата': op.get('дата'),
                 'операция': op.get('операция'),
                 'отделение': department,
                 'подразделение': op.get('подразделение'),
@@ -29,6 +30,7 @@ def json_to_dataframe(data: json) -> pd.DataFrame:
         else:
             for i in range(len(department)):
                 record = {
+                    'дата': op.get('дата'),
                     'операция': op.get('операция'),
                     'отделение': department[i],
                     'подразделение': op.get('подразделение'),

@@ -1,4 +1,7 @@
 /src/.env
+venv
 .venv
 /notebooks/.env
 .idea
+src/google_key.json
+src/data/*

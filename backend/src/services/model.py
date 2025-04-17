@@ -23,17 +23,24 @@ class YandexGPT:
             temperature=0)
 
     def run_model(self, message: str) -> dict:
-        transform_chain_department_pu = TransformChain(
+        transform_chain_references = TransformChain(
             input_variables=["input"],
             output_variables=["input"],
-            transform=self.__normalize_otd_pu_references
+            transform=self.__normalize_references
         )
 
-        transform_chain_normalize = TransformChain(
+        transform_chain_operation = TransformChain(
             input_variables=["input"],
             output_variables=["input"],
-            transform=self.__normalize_herbicide_operation
+            transform=self.__normalize_operation
         )
+
+        transform_chain_cultures = TransformChain(
+            input_variables=["input"],
+            output_variables=["input"],
+            transform=self.__normalize_cultures
+        )
+
         transform_chain_aor = TransformChain(
             input_variables=["output"],
             output_variables=["output"],
@@ -47,8 +54,9 @@ class YandexGPT:
 
         llm_chain = LLMChain(prompt=system_prompt, llm=self._model)
         full_chain = SimpleSequentialChain(
-            chains=[transform_chain_department_pu,
-                    transform_chain_normalize,
+            chains=[transform_chain_references,
+                    transform_chain_operation,
+                    transform_chain_cultures,
                     llm_chain,
                     transform_chain_aor],
             input_key="input",
@@ -64,7 +72,7 @@ class YandexGPT:
 
         return json.loads(cleaned)
 
-    def __normalize_herbicide_operation(self, inputs: dict) -> dict:
+    def __normalize_operation(self, inputs: dict) -> dict:
         text = inputs["input"]
         text = re.sub(r"внесение\s+почв\w*\s+гербицид\w*", "внесение гербицидов", text, flags=re.IGNORECASE)
 
@@ -115,7 +123,7 @@ class YandexGPT:
         data["операции"] = new_operations
         return {"output": json.dumps(data, ensure_ascii=False)}
 
-    def __normalize_otd_pu_references(self, inputs: dict) -> dict:
+    def __normalize_references(self, inputs: dict) -> dict:
         text = inputs["input"]
 
         text = re.sub(r"(по\s*п[уyу]|п[уyу])\s*(\d+)\s*/\s*(\d+)", r"ПУ \2/\3", text, flags=re.IGNORECASE)
@@ -128,4 +136,15 @@ class YandexGPT:
         text = re.sub(r"(отд\.?|отделение)\s*-?\s*(\d+)[\s-]+(\d+)/(\d+)", r"Отделение \2 \3/\4", text,
                       flags=re.IGNORECASE)
 
+        return {"input": text}
+
+    def __normalize_cultures(self, inputs: dict) -> dict:
+        text = inputs["input"]
+
+        text = re.sub(
+            r"\b(озим(ых|ая|ой|ую)?|оз(ы|им)?|зим(ых|няя|ою)?)\b",
+            "Пшеница озимая товарная",
+            text,
+            flags=re.IGNORECASE
+        )
         return {"input": text}

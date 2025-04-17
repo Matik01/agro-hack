@@ -10,7 +10,7 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         case_sensitive=True,
     )
-    print(str(Path(__file__).resolve().parents[2] / "src" / ".env"))
+
     APP_NAME: str = "AgroHack App"
     DEBUG: bool = Field(default=False)
     ENVIRONMENT: str = Field(default="development")
@@ -21,6 +21,8 @@ class Settings(BaseSettings):
 
     API_V1_PREFIX: str = "/api/v1"
     BACKEND_CORS_ORIGINS: list[AnyHttpUrl] = []
+
+    OUTPUT_DATA_FOLDER: str = 'data'
 
 
 @lru_cache()
