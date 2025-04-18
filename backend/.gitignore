@@ -4,4 +4,4 @@ venv
 /notebooks/.env
 .idea
 src/google_key.json
-src/data/*
+src/data/*.xlsx
