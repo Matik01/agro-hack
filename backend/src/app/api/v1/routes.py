@@ -33,9 +33,10 @@ def process_agro_message(
             model = YandexGPT(settings=settings)
             json_output = model.run_model(request.message)
             decoded_message = json_to_dataframe(json_output)
+
+            decoded_message["дата"] = request.id
             file_name = f'{request.id}_place_for_your_ads.xlsx'
             path_to_file = Path(settings.OUTPUT_DATA_FOLDER) / file_name
-
             if not path_to_file.is_file():
                 decoded_message.to_excel(excel_writer=path_to_file, index=False)
             else:
