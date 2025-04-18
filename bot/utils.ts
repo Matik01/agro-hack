@@ -2,7 +2,6 @@ import {Context} from "grammy";
 const axios = require('axios');
 
 export const botAnswer =  async (ctx: Context) => {
-    console.log(new Date().toDateString())
     const data = {
         id: new Date().toDateString(),
         message: ctx.message?.text
