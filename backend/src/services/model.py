@@ -47,6 +47,12 @@ class YandexGPT:
             transform=self.__assign_department
         )
 
+        transform_chain_no_negatives = TransformChain(
+            input_variables=["output"],
+            output_variables=["output"],
+            transform=self.remove_negative_values
+        )
+
         system_prompt = ChatPromptTemplate.from_messages([
             SystemMessagePromptTemplate.from_template(constants.AppConstants.SYSTEM_PROMPT),
             HumanMessagePromptTemplate.from_template("{input}")
@@ -58,10 +64,11 @@ class YandexGPT:
                     transform_chain_operation,
                     transform_chain_cultures,
                     llm_chain,
-                    transform_chain_aor],
+                    transform_chain_aor,
+                    transform_chain_no_negatives],
             input_key="input",
             output_key="output",
-            verbose=False
+            verbose=True
         )
         model_output = full_chain.run(message)
 
@@ -79,9 +86,6 @@ class YandexGPT:
         return {"input": text}
 
     def __assign_department(self, inputs: dict) -> dict:
-        import json
-        import re
-
         raw_output = inputs["output"]
 
         if isinstance(raw_output, str):
@@ -148,3 +152,28 @@ class YandexGPT:
             flags=re.IGNORECASE
         )
         return {"input": text}
+
+    def remove_negative_values(self, inputs: dict) -> dict:
+        import json
+
+        def sanitize_operation(op):
+            for key in ['площадь', 'площадь_по_ПУ', 'вал']:
+                if key in op and isinstance(op[key], dict):
+                    for subkey, val in op[key].items():
+                        if isinstance(val, (int, float)) and val < 0:
+                            op[key][subkey] = 0
+            return op
+
+        raw_output = inputs["output"]
+
+        if isinstance(raw_output, str):
+            raw_output = re.sub(r"^```(?:json)?\n?", "", raw_output.strip(), flags=re.IGNORECASE)
+            raw_output = re.sub(r"\n?```$", "", raw_output.strip())
+            data = json.loads(raw_output)
+        else:
+            data = raw_output
+
+        operations = data.get("операции", [])
+        data["операции"] = [sanitize_operation(op) for op in operations]
+
+        return {"output": json.dumps(data, ensure_ascii=False)}

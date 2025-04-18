@@ -5,23 +5,22 @@ from googleapiclient.discovery import build
 from google.oauth2 import service_account
 import mimetypes
 
-creds = service_account.Credentials.from_service_account_file(
-    'google_key.json',
-    scopes=['https://www.googleapis.com/auth/drive']
-)
-
-drive_service = build('drive', 'v3', credentials=creds)
-
 
 def upload_file_to_drive(file_path: str,
                          file_name: str,
-                         folder_id: str = '18EEp2MBw9ClfZ8fSEdI72ekl2BnYFQMO'):
+                         folder_id: str = '1oTSrFFknHx0msjLRkZ9MBqJNjHfrCHTB'):
+
+    creds = service_account.Credentials.from_service_account_file(
+        'google_key.json',
+        scopes=['https://www.googleapis.com/auth/drive']
+    )
+
+    drive_service = build('drive', 'v3', credentials=creds)
 
     query = (
         f"name='{file_name}' and "
         f"'{folder_id}' in parents and trashed = false"
     )
-
     response = drive_service.files().list(
         q=query,
         spaces='drive',

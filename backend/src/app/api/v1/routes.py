@@ -35,6 +35,8 @@ def process_agro_message(
             decoded_message = json_to_dataframe(json_output)
 
             decoded_message["дата"] = request.id
+            decoded_message.groupby(["операция", "подразделение", "растительная_культура"]).sum()
+            decoded_message.drop(columns=['отделение'], inplace=True)
             file_name = f'{request.id}_place_for_your_ads.xlsx'
             path_to_file = Path(settings.OUTPUT_DATA_FOLDER) / file_name
             if not path_to_file.is_file():
@@ -49,7 +51,7 @@ def process_agro_message(
 
         except Exception as e:
             logger.error("Ошибка при обработке запроса:\n%s", traceback.format_exc())
-            raise HTTPException(status_code=500, detail=str(e))
+
 
     background_tasks.add_task(process_message)
 
